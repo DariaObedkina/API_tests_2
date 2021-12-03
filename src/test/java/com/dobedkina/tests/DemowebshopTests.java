@@ -16,7 +16,7 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.is;
 
 
-public class DemowebshopTests {
+public class DemowebshopTests extends TestBase {
 
     @Test
     @DisplayName("Добавление одного товара в корзину")
