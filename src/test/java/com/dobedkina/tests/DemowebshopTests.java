@@ -1,5 +1,8 @@
 package com.dobedkina.tests;
 
+import com.dobedkina.models.ProductAddedToCart;
+import com.dobedkina.models.ProductAddedToWishlist;
+import com.dobedkina.models.ProductToAdd;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.Cookie;
@@ -10,70 +13,79 @@ import static com.codeborne.selenide.Condition.value;
 import static com.codeborne.selenide.Selectors.byName;
 import static com.codeborne.selenide.Selenide.*;
 import static com.codeborne.selenide.WebDriverRunner.getWebDriver;
-import static com.dobedkina.filters.CustomLogFilter.customLogFilter;
+import static com.dobedkina.specs.DemoWebShopSpecs.request;
+import static com.dobedkina.specs.DemoWebShopSpecs.response;
 import static io.qameta.allure.Allure.step;
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 public class DemowebshopTests extends TestBase {
 
+    private ProductAddedToCart productInCart;
+    private ProductAddedToWishlist productInWishList;
+    private String productAddedToCartMessage = "The product has been added to your <a href=\"/cart\">shopping cart</a>";
+    private String productAddedToWishlistMessage = "The product has been added to your <a href=\"/wishlist\">wishlist</a>";
+
     @Test
     @DisplayName("Добавление одного товара в корзину")
     void addProductToCart() {
-        step("Добавить товар в корзину", () ->
-                given()
-                        .filter(customLogFilter().withCustomTemplates())
-                        .contentType("application/x-www-form-urlencoded; charset=UTF-8")
-                        .body("product_attribute_72_5_18=53&product_attribute_72_6_19=54&" +
-                                "product_attribute_72_3_20=57&addtocart_72.EnteredQuantity=1")
-                        .when()
-                        .post("http://demowebshop.tricentis.com/addproducttocart/details/72/1")
-                        .then()
-                        .log().body()
-                        .statusCode(200)
-                        .body("success", is(true))
-                        .body("message", is("The product has been added to your <a href=\"/cart\">shopping cart</a>"))
-                        .body("updatetopcartsectionhtml", is("(1)")));
+        ProductToAdd product = new ProductToAdd();
+        product.setRawBody("product_attribute_72_5_18=53&product_attribute_72_6_19=54&" +
+                "product_attribute_72_3_20=57&addtocart_72.EnteredQuantity=1");
 
+        step("Добавить товар в корзину", () -> {
+            productInCart = given()
+                    .spec(request)
+                    .body(product.getRawBody())
+                    .when()
+                    .post("addproducttocart/details/72/1")
+                    .then()
+                    .spec(response)
+                    .extract().as(ProductAddedToCart.class);
+            assertEquals(productAddedToCartMessage, productInCart.getMessage());
+            assertEquals("(1)", productInCart.getUpdatetopcartsectionhtml());
+        });
     }
 
     @Test
     @DisplayName("Добавление одного товара в wishlist")
     void addProductToWishlist() {
-        step("Добавить товар в wishlist", () ->
-                given()
-                        .filter(customLogFilter().withCustomTemplates())
-                        .contentType("application/x-www-form-urlencoded; charset=UTF-8")
-                        .body("addtocart_43.EnteredQuantity=1")
-                        .when()
-                        .post("http://demowebshop.tricentis.com/addproducttocart/details/43/2")
-                        .then()
-                        .log().body()
-                        .statusCode(200)
-                        .body("success", is(true))
-                        .body("message", is("The product has been added to your <a href=\"/wishlist\">wishlist</a>"))
-                        .body("updatetopwishlistsectionhtml", is("(1)")));
+        ProductToAdd product = new ProductToAdd();
+        product.setRawBody("addtocart_43.EnteredQuantity=1");
 
+        step("Добавить товар в wishlist", () -> {
+            productInWishList = given()
+                    .spec(request)
+                    .body(product.getRawBody())
+                    .when()
+                    .post("addproducttocart/details/43/2")
+                    .then()
+                    .spec(response)
+                    .extract().as(ProductAddedToWishlist.class);
+            assertEquals(productAddedToWishlistMessage, productInWishList.getMessage());
+            assertEquals("(1)", productInWishList.getUpdatetopwishlistsectionhtml());
+        });
     }
 
     //API + UI test
     @Test
     @DisplayName("Удаление товара из корзины")
     void removeProductFromCart() {
+        ProductToAdd product = new ProductToAdd();
+        product.setRawBody("product_attribute_72_5_18=53&product_attribute_72_6_19=54&" +
+                "product_attribute_72_3_20=57&addtocart_72.EnteredQuantity=1");
+
         step("Добавить товар в корзину и подложить куки", () -> {
-            String cartCookie =
-                    given()
-                            .filter(customLogFilter().withCustomTemplates())
-                            .contentType("application/x-www-form-urlencoded; charset=UTF-8")
-                            .body("product_attribute_72_5_18=53&product_attribute_72_6_19=54&" +
-                                    "product_attribute_72_3_20=57&addtocart_72.EnteredQuantity=1")
-                            .when()
-                            .post("http://demowebshop.tricentis.com/addproducttocart/details/72/1")
-                            .then()
-                            .statusCode(200)
-                            .extract()
-                            .cookie("Nop.customer");
+            String cartCookie = given()
+                    .spec(request)
+                    .body(product.getRawBody())
+                    .when()
+                    .post("addproducttocart/details/72/1")
+                    .then()
+                    .spec(response)
+                    .extract()
+                    .cookie("Nop.customer");
 
             step("Открыть минимальный элемент", () ->
                     open("http://demowebshop.tricentis.com/Themes/DefaultClean/Content/images/logo.png"));
