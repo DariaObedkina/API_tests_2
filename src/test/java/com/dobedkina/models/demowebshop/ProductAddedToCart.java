@@ -1,4 +1,4 @@
-package com.dobedkina.models;
+package com.dobedkina.models.demowebshop;
 
 import groovy.transform.builder.Builder;
 import io.qameta.allure.internal.shadowed.jackson.annotation.JsonIgnoreProperties;

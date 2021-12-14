@@ -1,8 +1,9 @@
 package com.dobedkina.tests;
 
-import com.dobedkina.models.ProductAddedToCart;
-import com.dobedkina.models.ProductAddedToWishlist;
-import com.dobedkina.models.ProductToAdd;
+import com.dobedkina.models.demowebshop.ProductAddedToCart;
+import com.dobedkina.models.demowebshop.ProductAddedToWishlist;
+import com.dobedkina.models.demowebshop.ProductToAdd;
+import io.qameta.allure.Story;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.Cookie;
@@ -28,6 +29,7 @@ public class DemowebshopTests extends TestBase {
     private String productAddedToWishlistMessage = "The product has been added to your <a href=\"/wishlist\">wishlist</a>";
 
     @Test
+    @Story("DemoWebShop")
     @DisplayName("Добавление одного товара в корзину")
     void addProductToCart() {
         ProductToAdd product = new ProductToAdd();
@@ -49,6 +51,7 @@ public class DemowebshopTests extends TestBase {
     }
 
     @Test
+    @Story("DemoWebShop")
     @DisplayName("Добавление одного товара в wishlist")
     void addProductToWishlist() {
         ProductToAdd product = new ProductToAdd();
@@ -70,6 +73,7 @@ public class DemowebshopTests extends TestBase {
 
     //API + UI test
     @Test
+    @Story("DemoWebShop")
     @DisplayName("Удаление товара из корзины")
     void removeProductFromCart() {
         ProductToAdd product = new ProductToAdd();
